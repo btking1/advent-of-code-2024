@@ -3,10 +3,7 @@ use std::cell::RefCell;
 pub struct Cols(Vec<u32>, Vec<u32>);
 
 pub fn day_one_p1() -> Cols {
-    let s_file = std::fs::read_to_string(
-        "/Users/godsiom/coding/rust/advent-of-code-2024/data/location_id.txt",
-    )
-    .expect("file doesnt exist");
+    let s_file = std::fs::read_to_string("path").expect("file doesnt exist");
     // space = 32 new line = 10
 
     let filtered_s_file: Vec<&str> = s_file.split(char::is_whitespace).collect();
