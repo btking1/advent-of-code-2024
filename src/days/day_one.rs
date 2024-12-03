@@ -1,4 +1,8 @@
-pub fn day_one() {
+use std::cell::RefCell;
+
+pub struct Cols(Vec<u32>, Vec<u32>);
+
+pub fn day_one_p1() -> Cols {
     let s_file = std::fs::read_to_string(
         "/Users/godsiom/coding/rust/advent-of-code-2024/data/location_id.txt",
     )
@@ -31,7 +35,6 @@ pub fn day_one() {
 
     l_col.sort();
     r_col.sort();
-    println!("{}", l_col.len());
 
     let mut distances: Vec<u32> = Vec::new();
 
@@ -60,8 +63,50 @@ pub fn day_one() {
     let mut total = 0;
     for (i, dist) in distances.into_iter().enumerate() {
         total += dist;
-        println!("index: {i} distance: {dist}");
+        //println!("index: {i} distance: {dist}");
     }
-    println!("total: {total}");
-    //println!("l num bigger: {l_counter}, r num bigger: {r_counter}");
+    //println!("total: {total}");
+
+    Cols(l_col, r_col)
+}
+
+#[derive(Debug)]
+struct ColInfo {
+    number: u32,
+    count: RefCell<u32>,
+    sim_score: RefCell<u32>,
+}
+pub fn day_one_p2() {
+    let cols = day_one_p1();
+    let mut col_info_vec: Vec<std::sync::Arc<ColInfo>> = Vec::new();
+    let lc = cols.0;
+    let rc = cols.1;
+
+    for x in lc.into_iter() {
+        let col_info = std::sync::Arc::new(ColInfo {
+            number: x,
+            count: RefCell::new(1),
+            sim_score: RefCell::new(0),
+        });
+
+        for y in rc.clone().into_iter() {
+            if x == y {
+                col_info.count.replace_with(|&mut old| old + 1);
+            }
+        }
+
+        let count = col_info.count.clone().take();
+        col_info.sim_score.replace(col_info.number * (count - 1));
+        if count > 1 {
+            col_info_vec.push(col_info.clone());
+        }
+    }
+
+    let mut total = 0;
+    for entry in col_info_vec.into_iter() {
+        let sim_score = entry.sim_score.take();
+        total += sim_score;
+        println!("{:?}", entry);
+    }
+    println!("sim total: {total}");
 }
