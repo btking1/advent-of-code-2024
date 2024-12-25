@@ -1,3 +1,5 @@
+use regex::Regex;
+
 pub fn p1() {
     let file = std::fs::read("file").unwrap();
 
@@ -52,12 +54,83 @@ pub fn p1() {
         });
         rp_counter == 1 && c_counter == 1 && lp_counter == 1
     });
+    let mut operations = Vec::new();
 
-    verified_mul.into_iter().for_each(|arr| {
-        let s = arr
-            .into_iter()
-            .map(|c| c.to_string())
-            .collect::<Vec<String>>();
-        println!("{}", s.concat())
-    });
+    for arr in verified_mul.into_iter() {
+        for i in 1..(arr.len() - 1) {
+            if arr[i] == ',' {
+                let first_num = arr[1..i]
+                    .into_iter()
+                    .map(|c| c.to_string())
+                    .collect::<Vec<String>>();
+                let first_num: u32 = first_num
+                    .concat()
+                    .parse()
+                    .expect("error parse string to u32");
+
+                let second_num = arr[(i + 1)..(arr.len() - 1)]
+                    .into_iter()
+                    .map(|c| c.to_string())
+                    .collect::<Vec<String>>();
+                let second_num: u32 = second_num
+                    .concat()
+                    .parse()
+                    .expect("error parse string to u32");
+
+                operations.push((first_num, second_num));
+            }
+        }
+    }
+    let mut sum = 0;
+    for operation in operations.into_iter() {
+        let num_1 = operation.0;
+        let num_2 = operation.1;
+        sum += num_1 * num_2;
+        println!("{} {}", num_1, num_2);
+    }
+
+    println!("{}", sum);
+}
+
+pub fn p1_v2() {
+    let file = std::fs::read_to_string("file").unwrap();
+
+    let mul_regex = Regex::new(r###"mul\(\d{1,3}\,\d{1,3}\)"###).unwrap();
+
+    let mul_matches = mul_regex
+        .find_iter(&file)
+        .map(|mul| mul.as_str())
+        .collect::<Vec<&str>>();
+
+    let mut verified_mul = Vec::new();
+    for mul in mul_matches.into_iter() {
+        let mul_char = mul.chars().into_iter().collect::<Vec<_>>();
+
+        for i in 4..(mul_char.len() - 1) {
+            //print!("{}", mul_char[i]);
+            if mul_char[i] == ',' {
+                let first_num: u32 = mul_char[4..i]
+                    .into_iter()
+                    .map(|c| c.to_string())
+                    .collect::<Vec<String>>()
+                    .concat()
+                    .parse()
+                    .unwrap();
+                let second_num: u32 = mul_char[(i + 1)..mul_char.len() - 1]
+                    .into_iter()
+                    .map(|c| c.to_string())
+                    .collect::<Vec<String>>()
+                    .concat()
+                    .parse()
+                    .unwrap();
+
+                verified_mul.push((first_num, second_num))
+            }
+        }
+    }
+    let mut sum = 0;
+    for m in verified_mul.into_iter() {
+        sum += m.0 * m.1;
+    }
+    println!("{sum}");
 }
